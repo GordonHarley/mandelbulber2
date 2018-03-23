@@ -619,7 +619,7 @@ offset:</string>
       <item>
        <widget class="QGroupBox" name="groupBox_4">
         <property name="title">
-         <string>Viariable scale</string>
+         <string>Variable scale</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <property name="leftMargin">
@@ -1251,7 +1251,7 @@ offset:</string>
         <property name="text">
          <string notr="true">&lt;p&gt;BoxBulb power 2 V2 with scaling of z axis&lt;br&gt;This formula contains aux.color and aux.actualScaleA&lt;/p&gt;&lt;table&gt;
 &lt;/table&gt;
-&lt;h3&gt;Code&lt;/h3&gt;</string>
+&lt;br&gt;&lt;b&gt;Examples using this formula&lt;/b&gt;&lt;br&gt;Graeme McLaren  collection - license Creative Commons  (CC-BY 4.0)/boxFoldBulb_v2.fract&lt;br&gt;Graeme McLaren  collection - license Creative Commons  (CC-BY 4.0)/boxFoldBulb_v2_01.fract&lt;br&gt;Graeme McLaren  collection - license Creative Commons  (CC-BY 4.0)/mandelbulb_boxFoldBulb_hybrid.fract&lt;h3&gt;Code&lt;/h3&gt;</string>
         </property>
         <property name="wordWrap">
          <bool>true</bool>

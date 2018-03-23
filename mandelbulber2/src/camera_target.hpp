@@ -1,7 +1,7 @@
 /**
  * Mandelbulber v2, a 3D fractal generator       ,=#MKNmMMKmmßMNWy,
  *                                             ,B" ]L,,p%%%,,,§;, "K
- * Copyright (C) 2014-17 Mandelbulber Team     §R-==%w["'~5]m%=L.=~5N
+ * Copyright (C) 2014-18 Mandelbulber Team     §R-==%w["'~5]m%=L.=~5N
  *                                        ,=mm=§M ]=4 yJKA"/-Nsaj  "Bw,==,,
  * This file is part of Mandelbulber.    §R.r= jw",M  Km .mM  FW ",§=ß., ,TN
  *                                     ,4R =%["w[N=7]J '"5=],""]]M,w,-; T=]M
@@ -58,10 +58,9 @@ public:
 	CVector3 GetTopVector() const { return topVector; }
 	CVector3 GetRightVector() const { return rightVector; }
 	double GetDistance() const { return distance; }
-
-private:
 	static double CorrectAngle(double angle) { return fmod(angle + 3 * M_PI, 2 * M_PI) - M_PI; }
 
+private:
 	CVector3 camera;
 	CVector3 target;
 

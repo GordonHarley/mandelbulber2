@@ -1,7 +1,7 @@
 /**
  * Mandelbulber v2, a 3D fractal generator       ,=#MKNmMMKmmßMNWy,
  *                                             ,B" ]L,,p%%%,,,§;, "K
- * Copyright (C) 2016-17 Mandelbulber Team     §R-==%w["'~5]m%=L.=~5N
+ * Copyright (C) 2016-18 Mandelbulber Team     §R-==%w["'~5]m%=L.=~5N
  *                                        ,=mm=§M ]=4 yJKA"/-Nsaj  "Bw,==,,
  * This file is part of Mandelbulber.    §R.r= jw",M  Km .mM  FW ",§=ß., ,TN
  *                                     ,4R =%["w[N=7]J '"5=],""]]M,w,-; T=]M
@@ -38,6 +38,7 @@
 
 #include "ui_render_window.h"
 
+#include "camera_target.hpp"
 #include "common_math.h"
 #include "initparameters.hpp"
 #include "interface.hpp"
@@ -64,4 +65,60 @@ void RenderWindow::slotPressedButtonSetPositionPrimitive() const
 	int index = ui->comboBox_mouse_click_function->findData(item);
 	ui->comboBox_mouse_click_function->setCurrentIndex(index);
 	gMainInterface->renderedImage->setClickMode(item);
+}
+
+void RenderWindow::slotPressedButtonAllignPrimitiveAngle() const
+{
+	gMainInterface->SynchronizeInterface(gPar, gParFractal, qInterface::read);
+
+	CVector3 camera = gPar->Get<CVector3>("camera");
+	CVector3 target = gPar->Get<CVector3>("target");
+	CVector3 cameraTopVector = gPar->Get<CVector3>("camera_top");
+	cCameraTarget cameraTarget(camera, target, cameraTopVector);
+	CVector3 cameraRotation = cameraTarget.GetRotation();
+
+	CVector3 baseX = CVector3(1.0, 0.0, 0.0);
+	CVector3 baseY = CVector3(0.0, 1.0, 0.0);
+	CVector3 baseZ = CVector3(0.0, 0.0, 1.0);
+
+	// calculation of inverted rotation matrix
+	CRotationMatrix mRot;
+	mRot.RotateY(-cameraRotation.x); // yaw
+	mRot.RotateX(-cameraRotation.y); // pitch
+	mRot.RotateZ(-cameraRotation.z); // roll
+
+	baseX = mRot.RotateVector(baseX);
+	baseY = mRot.RotateVector(baseY);
+	baseZ = mRot.RotateVector(baseZ);
+
+	double alpha = (atan2(baseY.z, baseY.y));
+	double beta = -atan2(baseY.x, sqrt(baseY.z * baseY.z + baseY.y * baseY.y));
+
+	CVector3 vectorTemp = baseX;
+	vectorTemp = vectorTemp.RotateAroundVectorByAngle(CVector3(1.0, 0.0, 0.0), -alpha);
+	vectorTemp = vectorTemp.RotateAroundVectorByAngle(CVector3(0.0, 0.0, 1.0), -beta);
+
+	double gamma = -atan2(vectorTemp.z, vectorTemp.x); // FIXME wrong angle is calculated
+
+	alpha = cCameraTarget::CorrectAngle(alpha);
+	beta = cCameraTarget::CorrectAngle(beta);
+	gamma = cCameraTarget::CorrectAngle(gamma);
+
+	CVector3 rotationAligned(alpha * 180.0 / M_PI, beta * 180.0 / M_PI, gamma * 180.0 / M_PI);
+
+	QString buttonName = this->sender()->objectName();
+	QString primitiveName = buttonName.mid(buttonName.indexOf('_') + 1);
+
+	gPar->Set(primitiveName + "_rotation", rotationAligned);
+	gMainInterface->SynchronizeInterface(gPar, gParFractal, qInterface::write);
+
+	//	RotateZ(gamma); xy plane
+	//	RotateY(beta); xz plane
+	//	RotateX(alpha); yz plane
+
+	// camera rotation
+	// preparing rotation matrix
+	//	mRot.RotateZ(viewAngle.x); // yaw   xy plane
+	//	mRot.RotateX(viewAngle.y); // pitch yz plane
+	//	mRot.RotateY(viewAngle.z); // roll xz plane
 }

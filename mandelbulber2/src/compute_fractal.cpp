@@ -91,8 +91,8 @@ void Compute(const cNineFractals &fractals, const sFractalIn &in, sFractalOut *o
 
 	extendedAux.c = z;
 	extendedAux.const_c = z;
-	extendedAux.old_z = z;
-	extendedAux.sum_z = z;
+	extendedAux.old_z = CVector4(0.0, 0.0, 0.0, 0.0);
+	extendedAux.sum_z = CVector4(0.0, 0.0, 0.0, 0.0);
 	extendedAux.pos_neg = 1.0;
 	extendedAux.cw = 0;
 
@@ -256,6 +256,7 @@ void Compute(const cNineFractals &fractals, const sFractalIn &in, sFractalOut *o
 			default:
 			{
 				r = z.Length();
+				//r = sqrt(z.x * z.x + z.y * z.y + z.z * z.z);
 				break;
 			}
 		}
@@ -299,34 +300,44 @@ void Compute(const cNineFractals &fractals, const sFractalIn &in, sFractalOut *o
 			}
 			else if (Mode == calcModeColouring)
 			{
+				double colorW = 0.0;
+				if (in.material->fractalColoring.color4dEnabledFalse) colorW = z.w;
 
 				// double len = 0.0;
 				switch (in.material->fractalColoring.coloringAlgorithm)
 				{
 					case fractalColoring_Standard:
 					{
-						len = r;
+						len = sqrt(z.x * z.x + z.y * z.y + z.z * z.z + colorW * colorW);
 						break;
 					}
 					case fractalColoring_ZDotPoint:
 					{
-						len = fabs(z.Dot(CVector4(pointTransformed, 0.0))); // z.w
+						len = fabs(z.Dot(CVector4(pointTransformed, colorW))); // z.w
 						break;
 					}
 					case fractalColoring_Sphere:
 					{
-						len = fabs((z - CVector4(pointTransformed, 0.0)).Length() // z.w
+						len = fabs((z - CVector4(pointTransformed, colorW)).Length() // z.w
 											 - in.material->fractalColoring.sphereRadius);
 						break;
 					}
 					case fractalColoring_Cross:
 					{
-						len = dMin(fabs(z.x), fabs(z.y), fabs(z.z)); // z.w
+						len = dMin(fabs(z.x), fabs(z.y), fabs(z.z));
+						if (in.material->fractalColoring.color4dEnabledFalse)
+							len = min(len, colorW); // colorW unlikely to do much out at fractal surface, and
+																			// often will be the minimum
 						break;
 					}
 					case fractalColoring_Line:
 					{
-						len = fabs(z.Dot(CVector4(in.material->fractalColoring.lineDirection, 0.0))); // z.w hmmmm??
+						if (in.material->fractalColoring.color4dEnabledFalse)
+							len = fabs(
+								z.Dot(CVector4(in.material->fractalColoring.lineDirection, colorW))); // z.w hmmmm??
+						else
+							len = fabs(
+								z.Dot(CVector4(in.material->fractalColoring.lineDirection, 0.0))); // z.w hmmmm??
 						break;
 					}
 					case fractalColoring_None:
@@ -460,7 +471,6 @@ void Compute(const cNineFractals &fractals, const sFractalIn &in, sFractalOut *o
 					}
 					else
 						out->distance = r;
-
 					break;
 				}
 				case analyticFunctionJosKleinian:
@@ -473,8 +483,8 @@ void Compute(const cNineFractals &fractals, const sFractalIn &in, sFractalOut *o
 						/ max(extendedAux.pseudoKleinianDE, fractals.GetFractal(sequence)->analyticDE.offset1);
 					break;
 				}
-
 				case analyticFunctionNone: out->distance = -1.0; break;
+				case analyticFunctionUndefined: out->distance = r; break;
 			}
 		}
 	}

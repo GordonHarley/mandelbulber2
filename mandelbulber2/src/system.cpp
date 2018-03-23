@@ -1,7 +1,7 @@
 /**
  * Mandelbulber v2, a 3D fractal generator       ,=#MKNmMMKmmßMNWy,
  *                                             ,B" ]L,,p%%%,,,§;, "K
- * Copyright (C) 2014-17 Mandelbulber Team     §R-==%w["'~5]m%=L.=~5N
+ * Copyright (C) 2014-18 Mandelbulber Team     §R-==%w["'~5]m%=L.=~5N
  *                                        ,=mm=§M ]=4 yJKA"/-Nsaj  "Bw,==,,
  * This file is part of Mandelbulber.    §R.r= jw",M  Km .mM  FW ",§=ß., ,TN
  *                                     ,4R =%["w[N=7]J '"5=],""]]M,w,-; T=]M
@@ -690,4 +690,37 @@ void CalcPreferredFontSize(bool noGui)
 		systemData.SetPreferredFontSize(10);
 		systemData.SetPreferredThumbnailSize(80);
 	}
+}
+
+QString sSystem::GetIniFile() const
+{
+	double version = MANDELBULBER_VERSION;
+	int versionInt = int(version * 100);
+
+	QString iniFileName = QString("mandelbulber_%1.ini").arg(versionInt);
+	QString fullIniFileName = dataDirectoryHidden + iniFileName;
+
+	// if setting file doesn't exist then look for older files
+	if (!QFile::exists(fullIniFileName))
+	{
+		QString tempFileName;
+		for (int ver = versionInt; ver >= 212; ver--)
+		{
+			if (ver == 212)
+			{
+				tempFileName = QString("mandelbulber.ini");
+			}
+			else
+			{
+				tempFileName = QString("mandelbulber_%1.ini").arg(ver);
+			}
+
+			if (QFile::exists(dataDirectoryHidden + tempFileName))
+			{
+				fcopy(dataDirectoryHidden + tempFileName, fullIniFileName);
+				WriteLogString("Found older settings file", dataDirectoryHidden + tempFileName, 1);
+			}
+		}
+	}
+	return fullIniFileName;
 }
